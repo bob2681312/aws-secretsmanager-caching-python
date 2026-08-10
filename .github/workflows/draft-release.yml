@@ -33,7 +33,7 @@ jobs:
             exit 1
           fi
       - name: call PR workflow
-        uses: ${{ github.repository }}/.github/workflows/python-package.yml
+        uses: ./.github/workflows/python-package.yml
 
   draft-release:
     needs: build
