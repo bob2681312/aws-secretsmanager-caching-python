@@ -32,8 +32,8 @@ jobs:
             echo "::error::Invalid version format '$VERSION'. Must match X.Y.Z (e.g., 1.0.4)"
             exit 1
           fi
-      - name: call PR workflow
-        uses: ./.github/workflows/python-package.yml
+  test:
+    uses: ./.github/workflows/python-package.yml
 
   draft-release:
     needs: build
