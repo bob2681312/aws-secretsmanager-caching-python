@@ -42,6 +42,8 @@ jobs:
         run: pylint --rcfile=.pylintrc src/aws_secretsmanager_caching
       - name: Check formatting with Ruff
         uses: astral-sh/ruff-action@v3
+        with:
+          version: "0.15.22"
       - name: Test with pytest
         run: |
           pytest test/unit/
