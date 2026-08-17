@@ -48,8 +48,8 @@ jobs:
     uses: ./.github/workflows/python-package.yml
 
   draft-release:
-    needs: run-test
     runs-on: ubuntu-latest
+    needs: run-test
     permissions:
       contents: write
     environment: release
@@ -66,4 +66,124 @@ jobs:
             --target "$GITHUB_SHA"
 
           echo "Drafted release v$VERSION"
-      
+  
+  release-test-information-PLEASE-READ:
+    runs-on: ubuntu-latest
+    needs: draft-release
+    steps:
+      - name: Review Instructuons (PLEASE READ)
+        run: |
+          echo "Please do the following before approving release for prod."
+          echo "Go to https://test.pypi.org/project/aws-secretsmanager-caching/"
+          echo "Check the page for completeness. There should be a new version published, and two artifacts in the "Download files" section: a wheel (.whl) and a source distribution (.tar.gz)"
+
+  release-test:
+    runs-on: ubuntu-latest
+    needs: release-test-information-PLEASE-READ
+    # Guard against the poll loop below burning runner minutes if a build hangs
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write
+    environment: release-prod
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@cabfdba3510de1431bac9dba27511d97497fc100
+        with:
+          role-to-assume: ${{ secrets.RELEASE_ROLE_ARN }}
+          aws-region: us-west-2
+          role-duration-seconds: 3600
+
+      - name: Start test release build
+        id: start
+        run: |
+          BUILD_ID=$(aws codebuild start-build \
+            --project-name "python-caching-library-PyPi-release-Test" \
+            --source-version "$GITHUB_SHA" \
+            --query 'build.id' --output text)
+
+          echo "build-id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for test release build
+        env:
+          BUILD_ID: ${{ steps.start.outputs.build-id }}
+        run: |
+          while true; do
+            STATUS=$(aws codebuild batch-get-builds --ids "$BUILD_ID" \
+              --query 'builds[0].buildStatus' --output text)
+
+            case "$STATUS" in
+              IN_PROGRESS)
+                echo "Build has not finished, sleep for 30 more seconds"
+                sleep 30
+                ;;
+              SUCCEEDED)
+                echo "Build succeeded!"
+                exit 0
+                ;;
+              *)
+                echo "::error::Build finished with status $STATUS."
+                exit 1
+                ;;
+            esac
+          done
+  
+  release-prod-information-PLEASE-READ:
+    runs-on: ubuntu-latest
+    needs: release-test
+    steps:
+      - name: Review Instructuons (PLEASE READ)
+        run: |
+          echo "Please do the following before approving release for prod."
+          echo "Go to https://test.pypi.org/project/aws-secretsmanager-caching/"
+          echo "Check the page for completeness. There should be a new version published, and two artifacts in the "Download files" section: a wheel (.whl) and a source distribution (.tar.gz)"
+
+  release-prod:
+    runs-on: ubuntu-latest
+    needs: release-prod-information-PLEASE-READ
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write
+    environment: release-prod
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@cabfdba3510de1431bac9dba27511d97497fc100
+        with:
+          role-to-assume: ${{ secrets.RELEASE_ROLE_ARN }}
+          aws-region: us-west-2
+          role-duration-seconds: 3600
+
+      - name: Start prod release build
+        id: start
+        run: |
+          BUILD_ID=$(aws codebuild start-build \
+            --project-name "python-caching-library-PyPi-release-Test" \
+            --source-version "$GITHUB_SHA" \
+            --query 'build.id' --output text)
+
+          echo "build-id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for prod release build
+        env:
+          BUILD_ID: ${{ steps.start.outputs.build-id }}
+        run: |
+          while true; do
+            STATUS=$(aws codebuild batch-get-builds --ids "$BUILD_ID" \
+              --query 'builds[0].buildStatus' --output text)
+
+            case "$STATUS" in
+              IN_PROGRESS)
+                echo "Build has not finished, sleep for 30 more seconds"
+                sleep 30
+                ;;
+              SUCCEEDED)
+                echo "Build succeeded!"
+                exit 0
+                ;;
+              *)
+                echo "::error::Build finished with status $STATUS."
+                exit 1
+                ;;
+            esac
+          done
