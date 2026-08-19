@@ -73,9 +73,7 @@ jobs:
     steps:
       - name: Review Instructuons (PLEASE READ)
         run: |
-          echo "Please do the following before approving release for prod."
-          echo "Go to https://test.pypi.org/project/aws-secretsmanager-caching/"
-          echo "Check the page for completeness. There should be a new version published, and two artifacts in the "Download files" section: a wheel (.whl) and a source distribution (.tar.gz)"
+          echo "Please make sure the correct version has been pushed before continuing"
 
   release-test:
     runs-on: ubuntu-latest
@@ -85,7 +83,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    environment: release-prod
+    environment: release-test
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@cabfdba3510de1431bac9dba27511d97497fc100
@@ -158,7 +156,7 @@ jobs:
         id: start
         run: |
           BUILD_ID=$(aws codebuild start-build \
-            --project-name "python-caching-library-PyPi-release-Test" \
+            --project-name "python-caching-library-PyPi-release-Prod" \
             --source-version "$GITHUB_SHA" \
             --query 'build.id' --output text)
 
