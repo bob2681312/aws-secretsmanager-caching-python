@@ -58,6 +58,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
         run: |
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
           gh release create "v$VERSION" \
             --title "v$VERSION" \
             --generate-notes \
