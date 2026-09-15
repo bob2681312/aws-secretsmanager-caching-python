@@ -4,11 +4,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="aws_secretsmanager_caching",
+    name="aws_secretsmanager_caching_test",
     description="Client-side AWS Secrets Manager caching library",
-    url="https://github.com/aws/aws-secretsmanager-caching-python",
+    url="https://github.com/bob2681312/aws-secretsmanager-caching-python",
     author="Amazon Web Services",
-    author_email="aws-secretsmanager-dev@amazon.com",
+    author_email="oryanl@amazon.com",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(where="src", exclude=("test",)),
