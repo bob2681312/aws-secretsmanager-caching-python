@@ -62,6 +62,7 @@ jobs:
             --title "v$VERSION" \
             --generate-notes \
             --target "$GITHUB_SHA"
+            --draft
 
           echo "Drafted release v$VERSION"
     
