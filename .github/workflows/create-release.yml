@@ -83,9 +83,7 @@ jobs:
       - name: build release distributions
         run: |
           set -euo pipefail
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install build wheel setuptools
+          pip install build
           python -m build
 
       - name: upload artifacts
