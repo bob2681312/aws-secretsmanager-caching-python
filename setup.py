@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="aws_secretsmanager_caching_test",
+    name="Test124120420-4",
     description="Client-side AWS Secrets Manager caching library",
     url="https://github.com/bob2681312/aws-secretsmanager-caching-python",
     author="Amazon Web Services",
