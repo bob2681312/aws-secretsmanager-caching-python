@@ -52,6 +52,7 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
+          verbose: true
   
   READ-PLEASE:
     runs-on: ubuntu-latest
