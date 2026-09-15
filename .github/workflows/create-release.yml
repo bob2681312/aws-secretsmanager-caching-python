@@ -83,7 +83,6 @@ jobs:
       - name: build release distributions
         run: |
           set -euo pipefail
-          pip install build
           python -m build
 
       - name: upload artifacts
