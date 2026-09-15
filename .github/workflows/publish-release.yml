@@ -24,7 +24,6 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           pip install build wheel setuptools
-          python -m pip install .
           python -m build
 
       - name: upload artifacts
