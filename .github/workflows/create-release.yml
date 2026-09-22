@@ -62,13 +62,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
         run: |
-          git tag "v$VERSION"
-          git push origin "v$VERSION"
           gh release create "v$VERSION" \
             --title "v$VERSION" \
             --generate-notes \
-            --target "$GITHUB_SHA" \
-            --draft
+            --target "$GITHUB_SHA"
 
           echo "Drafted release v$VERSION"
     
@@ -100,10 +97,9 @@ jobs:
           path: dist/
 
   pypi-publish-test:
+    needs: release-build
     runs-on: ubuntu-latest
     environment: publish-test
-    needs:
-      - release-build
     permissions:
       id-token: write
 
@@ -119,11 +115,10 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
-          verbose: true
   
   READ-PLEASE:
-    runs-on: ubuntu-latest
     needs: pypi-publish-test
+    runs-on: ubuntu-latest
     steps:
       - name: Review Instructuons (PLEASE READ)
         run: |
@@ -133,10 +128,9 @@ jobs:
     
 
   pypi-publish:
+    needs: READ-PLEASE
     runs-on: ubuntu-latest
-    environment: publish # Will act as a temporary blocker that the invoker can self-approve so that they would check if the binaries uploaded properly
-    needs:
-      - READ-PLEASE
+    environment: publish
     permissions:
       id-token: write
 
